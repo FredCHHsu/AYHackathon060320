@@ -1,25 +1,25 @@
 ---
 name: 發布
-description: 執行 git push 並自動開啟 merge 回 main 分支的 Pull Request
+description: 執行 git push 後，將遠端當前分支自動 merge 進遠端 main 分支
 ---
 
 # 發布 Skill 指南
 
-當使用者調用此 skill（「發布」）時，請遵循以下步驟來完成從發布到開啟 PR 的完整流程：
+當使用者調用此 skill（「發布」）時，請遵循以下步驟來完成推播與遠端 merge 流程：
 
 1. **執行 Git Push**
-   使用 `run_command` 工具在終端機執行推播指令，為了防範尚未設定 upstream 的問題，可以直接使用：
+   使用 `run_command` 工具在終端機執行推播指令，確保本地變更推播到遠端對應的分支：
    ```bash
    git push -u origin HEAD
    ```
 
-2. **建立 Pull Request (PR)**
-   在確定推播成功後，使用 GitHub CLI (`gh`) 建立合併進 `main` 分支的 Pull Request：
+2. **遠端 Merge 至 main 分支**
+   在確定推播成功後，使用 GitHub CLI (`gh`) 透過建立 Pull Request 並立即合併的方式，將當下 branch 的變更合併進遠端的 `main` 分支。請依序執行以下指令：
    ```bash
-   gh pr create --base main --head HEAD --fill
+   gh pr create --base main --head HEAD --fill || true
+   gh pr merge --merge
    ```
-   > **註**：`--fill` 會自動拿標題與 commit message 作為 PR 的內容。如果系統因為缺少 `gh` 指令而失敗，請主動說明錯誤，並告知使用者可能需要安裝 `gh` 或登入。
+   > **註**：第一行 `|| true` 是為了防止 PR 已經存在時指令報錯中斷。第二行 `gh pr merge --merge` 則會將該 PR 正式合併至 `main`。若使用者的 GitHub 設定要求使用 squash 可以改用 `--squash`。
 
-3. **提供 PR 連結**
-   `gh pr create` 指令成功執行後，終端機會輸出一條 PR 的網址（例如 `https://github.com/User/Repo/pull/123`）。
-   請將該連結整理並以 Markdown 格式顯示給使用者（如：`[點此查看 Pull Request](網址)`），並告知發布流程已全部完成！
+3. **回報結果**
+   指令順利完成後，告知使用者分支已經成功推播，並且也已經順利在遠端合併進入 `main` 分支（即發布流程已全部完成）。
